@@ -50,4 +50,22 @@ export class Hardware
             console.log("[HW - " + this.name + " id: " + this.id + " - " + Date.now() + "]: " + message);
         }
     }
+
+    //return the hex string representation of num
+    public hexLog(num : number, length : number) : String
+    {
+        var stringNum : String = num.toString(16);
+
+        if(stringNum.length > length)
+        {
+            this.log("[ERROR] Error formatting hex string");
+            stringNum = null; //if there is an error, send back a null value
+        }
+        else
+        {
+            stringNum.padStart(length, "0");
+        }
+
+        return stringNum;
+    }
 }
