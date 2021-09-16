@@ -1,11 +1,12 @@
 import { Hardware } from "./Hardware";
+import { ClockListener } from "./imp/ClockListener";
 
 const ADDRESS_SPACE : number = 0x10000; //# of address spaces in memory
 const ADD_SPACE_FMT_LEN : number = 4;
-const MAX_WORD_SIZE : number = 0xff;
+const MAX_WORD_SIZE : number = 0xFF;
 const WORD_FMT_LEN : number = 2;
 
-export class Memory extends Hardware
+export class Memory extends Hardware implements ClockListener
 {
     private memory : number[];
 
@@ -20,6 +21,12 @@ export class Memory extends Hardware
         {
             this.memory[i] = 0x00;
         }
+    }
+
+
+    public pulse() : void
+    {
+        this.log("recieved clock pulse");
     }
 
 
