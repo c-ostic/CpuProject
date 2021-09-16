@@ -56,15 +56,7 @@ export class Hardware
     {
         var stringNum : String = num.toString(16);
 
-        if(stringNum.length > length)
-        {
-            this.log("[ERROR] Error formatting hex string");
-            stringNum = null; //if there is an error, send back a null value
-        }
-        else
-        {
-            stringNum.padStart(length, "0");
-        }
+        stringNum = stringNum.padStart(length, "0").toUpperCase();
 
         return stringNum;
     }

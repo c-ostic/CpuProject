@@ -121,7 +121,7 @@ export class Memory extends Hardware
 
         //if there's no error, display the range
         if(!hasError)
-            for (var i = 0; i <= length; i++)
+            for (var i = 0; i < length; i++)
                 this.displayMemory(location + i);
     }
 }
