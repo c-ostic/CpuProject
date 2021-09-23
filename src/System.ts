@@ -1,6 +1,8 @@
 // import statements for hardware
-import {Cpu} from "./hardware/Cpu";
+import { Clock } from "./hardware/Clock";
+import { Cpu } from "./hardware/Cpu";
 import { Hardware } from "./hardware/Hardware";
+import { Memory } from "./hardware/Memory";
 
 
 /*
@@ -18,6 +20,8 @@ const CLOCK_INTERVAL= 500;               // This is in ms (milliseconds) so 1000
 export class System extends Hardware
 {
     private _CPU : Cpu = null;
+    private _Memory : Memory = null;
+    private _Clock : Clock = null;
     
     public running: boolean = false;
 
@@ -25,8 +29,9 @@ export class System extends Hardware
     {
         super(0, "System");
 
-
         this._CPU = new Cpu();
+        this._Memory = new Memory();
+        this._Clock = new Clock(CLOCK_INTERVAL);
         
         /*
         Start the system (Analogous to pressing the power button and having voltages flow through the components)
@@ -40,10 +45,19 @@ export class System extends Hardware
 
     public startSystem(): boolean 
     {
-        this._CPU.setDebug(false);
+        //this._CPU.setDebug(false);
 
         this.log("created");
         this._CPU.log("created");
+        this._Memory.log("created");
+        this._Clock.log("created");
+
+        this._Clock.register(this._CPU);
+        this._Clock.register(this._Memory);
+
+        this._Memory.displayMemory(0x10000);
+        this._Memory.displayMemoryRange(0x00, 0x14);
+
         return true;
     }
 

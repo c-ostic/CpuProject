@@ -50,4 +50,14 @@ export class Hardware
             console.log("[HW - " + this.name + " id: " + this.id + " - " + Date.now() + "]: " + message);
         }
     }
+
+    //return the hex string representation of num
+    public hexLog(num : number, length : number) : String
+    {
+        var stringNum : String = num.toString(16);
+
+        stringNum = stringNum.padStart(length, "0").toUpperCase();
+
+        return stringNum;
+    }
 }
