@@ -9,6 +9,8 @@ const WORD_FMT_LEN : number = 2;
 export class Memory extends Hardware implements ClockListener
 {
     private memory : number[];
+    private mar : number;
+    private mdr : number;
 
     constructor()
     {
@@ -17,16 +19,40 @@ export class Memory extends Hardware implements ClockListener
         //total memory of 65536
         this.memory = new Array(ADDRESS_SPACE);
 
-        for (var i = 0x00; i < this.memory.length; i++)
-        {
-            this.memory[i] = 0x00;
-        }
+        this.reset();
     }
 
+    public getMAR() : number
+    {
+        return this.mar;
+    }
+
+    public setMAR(address : number) : void
+    {
+        this.mar = address;
+    }
+
+    public getMDR() : number
+    {
+        return this.mdr;
+    }
+
+    public setMDR(data : number) : void
+    {
+        this.mdr = data;
+    }
 
     public pulse() : void
     {
         this.log("recieved clock pulse");
+    }
+
+    public reset() : void
+    {
+        for (var i = 0x00; i < this.memory.length; i++)
+        {
+            this.memory[i] = 0x00;
+        }
     }
 
 
