@@ -25,13 +25,13 @@ export class System extends Hardware
     
     public running: boolean = false;
 
-    constructor() 
+    constructor(debug : boolean) 
     {
-        super(0, "System");
+        super(0, "System", debug);
 
-        this._CPU = new Cpu();
-        this._Memory = new Memory();
-        this._Clock = new Clock(CLOCK_INTERVAL);
+        this._CPU = new Cpu(true);
+        this._Memory = new Memory(true);
+        this._Clock = new Clock(true, CLOCK_INTERVAL);
         
         /*
         Start the system (Analogous to pressing the power button and having voltages flow through the components)
@@ -40,18 +40,10 @@ export class System extends Hardware
          */
 
         this.startSystem();
-
     }
 
     public startSystem(): boolean 
     {
-        //this._CPU.setDebug(false);
-
-        this.log("created");
-        this._CPU.log("created");
-        this._Memory.log("created");
-        this._Clock.log("created");
-
         this._Clock.register(this._CPU);
         this._Clock.register(this._Memory);
 
@@ -64,4 +56,4 @@ export class System extends Hardware
     }
 }
 
-let system: System = new System();
+let system: System = new System(true);

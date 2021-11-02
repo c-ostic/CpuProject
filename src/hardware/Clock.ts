@@ -6,9 +6,9 @@ export class Clock extends Hardware
     private clockListeners : ClockListener[];
     private clockInterval : number;
 
-    constructor(interval : number)
+    constructor(debug : boolean, interval : number)
     {
-        super(0, "Clock");
+        super(0, "Clock", debug);
         this.clockListeners = new Array();
         this.clockInterval = interval;
 

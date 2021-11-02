@@ -12,9 +12,9 @@ export class Memory extends Hardware implements ClockListener
     private mar : number;
     private mdr : number;
 
-    constructor()
+    constructor(debug : boolean)
     {
-        super(0, "RAM");
+        super(0, "RAM", debug);
 
         //total memory of 65536
         this.memory = new Array(ADDRESS_SPACE);

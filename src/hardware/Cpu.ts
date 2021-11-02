@@ -6,10 +6,10 @@ export class Cpu extends Hardware implements ClockListener
 {
     private cpuClockCount : number;
 
-    constructor() 
+    constructor(debug : boolean) 
     {
-        super(0, "CPU");
-        this.cpuClockCount = 0;     
+        super(0, "CPU", debug);
+        this.cpuClockCount = 0;
     }
     
 

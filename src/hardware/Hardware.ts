@@ -10,6 +10,8 @@ export class Hardware
         this.id = id;
         this.name = name;
         this.debug = debug; //set to true if not specified in constructor
+
+        this.log("created");
     }
 
     public setID(newID : number) : void
