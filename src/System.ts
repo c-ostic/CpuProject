@@ -55,9 +55,6 @@ export class System extends Hardware
         this._Clock.register(this._CPU);
         this._Clock.register(this._Memory);
 
-        this._Memory.displayMemory(0x10000);
-        this._Memory.displayMemoryRange(0x00, 0x14);
-
         return true;
     }
 

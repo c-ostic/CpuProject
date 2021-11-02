@@ -18,6 +18,7 @@ export class Memory extends Hardware implements ClockListener
 
         //total memory of 65536
         this.memory = new Array(ADDRESS_SPACE);
+        this.log("Created - Addressable space : 65536")
 
         this.reset();
     }
@@ -57,33 +58,31 @@ export class Memory extends Hardware implements ClockListener
 
 
     /*
-    Save data in a specific location in memory
-    data - the data to be saved
-    location - the location the data should be saved to
+    Save data in a specific location in memory using MAR and MDR
     return - true if save was successful, false otherwise
     */
-    public setMemoryAtLocation(data : number, location : number) : boolean 
+    public write() : boolean 
     {
         var flag : boolean;
 
         //first check if location is valid
-        if (location < 0x00 || location >= ADDRESS_SPACE)
+        if (this.mar < 0x00 || this.mar >= ADDRESS_SPACE)
         {
             flag = false;
-            this.log("[ERROR] Address " + this.hexLog(location, ADD_SPACE_FMT_LEN) + " undefined");
+            this.log("[ERROR] Address " + this.hexLog(this.mar, ADD_SPACE_FMT_LEN) + " undefined");
         }
         else
         {
             //then check if data is valid
-            if(data > MAX_WORD_SIZE)
+            if(this.mdr > MAX_WORD_SIZE)
             {
                 flag = false;
-                this.log("[ERROR] Value " + this.hexLog(data, WORD_FMT_LEN) + " too large to store");
+                this.log("[ERROR] Value " + this.hexLog(this.mdr, WORD_FMT_LEN) + " too large to store");
             }
             else
             {
                 flag = true;
-                this.memory[location] = data;
+                this.memory[this.mar] = this.mdr;
             }
         }
 
@@ -92,69 +91,19 @@ export class Memory extends Hardware implements ClockListener
 
 
     /*
-    Retrieve data from a specific location in memory
-    location - the location to be retrieved
-    return - the data at location, or null if location is out of range
+    Retrieve data from a specific location in memory using MAR and MDR
     */
-    public readMemory(location : number) : number
+    public read() : void
     {
-        var data : number;
-
         //if location is invalid, set data to null and log an error
-        if (location < 0x00 || location >= ADDRESS_SPACE)
+        if (this.mar < 0x00 || this.mar >= ADDRESS_SPACE)
         {
-            data = null;
-            this.log("[ERROR] Address " + this.hexLog(location, ADD_SPACE_FMT_LEN) + " undefined");
+            this.mdr = null;
+            this.log("[ERROR] Address " + this.hexLog(this.mar, ADD_SPACE_FMT_LEN) + " undefined");
         }
         else
         {
-            data = this.memory[location];
+            this.mdr = this.memory[this.mar];
         }
-
-        return data;
-    }
-
-
-    /*
-    Log data from a specific location in memory
-    location - the location to be retrieved
-    */
-    public displayMemory(location : number) : void
-    {
-        //if location is invalid, set data to null and log an error
-        if (location < 0x00 || location >= ADDRESS_SPACE)
-            this.log("[ERROR] Address " + this.hexLog(location, ADD_SPACE_FMT_LEN) + " undefined");
-        else
-            this.log("Address: " + this.hexLog(location, ADD_SPACE_FMT_LEN) + "\tValue: " + 
-                this.hexLog(this.memory[location], WORD_FMT_LEN));
-    }
-
-
-    /*
-    Log data from a specific location range in memory
-    location - the starting location of the range
-    length - the amount of memory locations to log
-    */
-    public displayMemoryRange(location : number, length : number) : void
-    {
-        var hasError : boolean = false;
-
-        //if either bound is invalid, set data to null and log an error
-        if (location < 0x00 || location >= ADDRESS_SPACE)
-        {
-            hasError = true;
-            this.log("[ERROR] Address " + this.hexLog(location, ADD_SPACE_FMT_LEN) + " undefined");
-        }
-
-        if (location + length >= ADDRESS_SPACE)
-        {
-            hasError = true;
-            this.log("[ERROR] Specified length (" + this.hexLog(length, ADD_SPACE_FMT_LEN) + ") exceeds address space");
-        }
-
-        //if there's no error, display the range
-        if(!hasError)
-            for (var i = 0; i < length; i++)
-                this.displayMemory(location + i);
     }
 }
