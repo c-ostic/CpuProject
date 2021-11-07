@@ -3,6 +3,7 @@ import { Clock } from "./hardware/Clock";
 import { Cpu } from "./hardware/Cpu";
 import { Hardware } from "./hardware/Hardware";
 import { Memory } from "./hardware/Memory";
+import { MMU } from "./hardware/MMU";
 
 
 /*
@@ -21,6 +22,7 @@ export class System extends Hardware
 {
     private _CPU : Cpu = null;
     private _Memory : Memory = null;
+    private _MMU : MMU = null;
     private _Clock : Clock = null;
     
     public running: boolean = false;
@@ -31,6 +33,7 @@ export class System extends Hardware
 
         this._CPU = new Cpu(true);
         this._Memory = new Memory(true);
+        this._MMU = new MMU(true, this._Memory);
         this._Clock = new Clock(true, CLOCK_INTERVAL);
         
         /*
@@ -40,6 +43,8 @@ export class System extends Hardware
          */
 
         this.startSystem();
+
+        this._MMU.memoryDump(0x0000, 0x000F);
     }
 
     public startSystem(): boolean 
@@ -47,12 +52,29 @@ export class System extends Hardware
         this._Clock.register(this._CPU);
         this._Clock.register(this._Memory);
 
+        this.flashProgram();
+
         return true;
     }
 
     public stopSystem(): boolean 
     {
         return false;
+    }
+
+    public flashProgram() : void
+    {
+        this._MMU.writeImmediate(0x0000, 0xA9);
+        this._MMU.writeImmediate(0x0001, 0x0D);
+        this._MMU.writeImmediate(0x0002, 0xA9);
+        this._MMU.writeImmediate(0x0003, 0x1D);
+        this._MMU.writeImmediate(0x0004, 0xA9);
+        this._MMU.writeImmediate(0x0005, 0x2D);
+        this._MMU.writeImmediate(0x0006, 0xA9);
+        this._MMU.writeImmediate(0x0007, 0x3F);
+        this._MMU.writeImmediate(0x0008, 0xA9);
+        this._MMU.writeImmediate(0x0009, 0xFF);
+        this._MMU.writeImmediate(0x000A, 0x00);
     }
 }
 
