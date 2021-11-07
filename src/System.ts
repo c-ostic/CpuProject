@@ -3,6 +3,7 @@ import { Clock } from "./hardware/Clock";
 import { Cpu } from "./hardware/Cpu";
 import { Hardware } from "./hardware/Hardware";
 import { Memory } from "./hardware/Memory";
+import { MMU } from "./hardware/MMU";
 
 
 /*
@@ -21,17 +22,21 @@ export class System extends Hardware
 {
     private _CPU : Cpu = null;
     private _Memory : Memory = null;
+    private _MMU : MMU = null;
     private _Clock : Clock = null;
     
     public running: boolean = false;
 
-    constructor() 
+    constructor(debug : boolean) 
     {
-        super(0, "System");
+        super(0, "System", debug);
 
-        this._CPU = new Cpu();
-        this._Memory = new Memory();
-        this._Clock = new Clock(CLOCK_INTERVAL);
+        this._CPU = new Cpu(true);
+        this._Memory = new Memory(true);
+        this._MMU = new MMU(true, this._Memory);
+        this._Clock = new Clock(true, CLOCK_INTERVAL);
+
+        this.log("created");
         
         /*
         Start the system (Analogous to pressing the power button and having voltages flow through the components)
@@ -41,22 +46,15 @@ export class System extends Hardware
 
         this.startSystem();
 
+        this._MMU.memoryDump(0x0000, 0x000F);
     }
 
     public startSystem(): boolean 
     {
-        //this._CPU.setDebug(false);
-
-        this.log("created");
-        this._CPU.log("created");
-        this._Memory.log("created");
-        this._Clock.log("created");
-
         this._Clock.register(this._CPU);
         this._Clock.register(this._Memory);
 
-        this._Memory.displayMemory(0x10000);
-        this._Memory.displayMemoryRange(0x00, 0x14);
+        this.flashProgram();
 
         return true;
     }
@@ -65,6 +63,21 @@ export class System extends Hardware
     {
         return false;
     }
+
+    public flashProgram() : void
+    {
+        this._MMU.writeImmediate(0x0000, 0xA9);
+        this._MMU.writeImmediate(0x0001, 0x0D);
+        this._MMU.writeImmediate(0x0002, 0xA9);
+        this._MMU.writeImmediate(0x0003, 0x1D);
+        this._MMU.writeImmediate(0x0004, 0xA9);
+        this._MMU.writeImmediate(0x0005, 0x2D);
+        this._MMU.writeImmediate(0x0006, 0xA9);
+        this._MMU.writeImmediate(0x0007, 0x3F);
+        this._MMU.writeImmediate(0x0008, 0xA9);
+        this._MMU.writeImmediate(0x0009, 0xFF);
+        this._MMU.writeImmediate(0x000A, 0x00);
+    }
 }
 
-let system: System = new System();
+let system: System = new System(true);
