@@ -12,6 +12,8 @@ export class MMU extends Hardware
     {
         super(0, "MMU", debug);
         this._RAM = ram;
+
+        this.log("created");
     }
 
     /*

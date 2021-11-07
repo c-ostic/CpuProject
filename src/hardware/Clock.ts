@@ -13,6 +13,8 @@ export class Clock extends Hardware
         this.clockInterval = interval;
 
         setInterval(() => this.sendPulse(), this.clockInterval);
+
+        this.log("created");
     }
 
 

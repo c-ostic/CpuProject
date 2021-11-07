@@ -18,7 +18,7 @@ export class Memory extends Hardware implements ClockListener
 
         //total memory of 65536
         this.memory = new Array(ADDRESS_SPACE);
-        this.log("Created - Addressable space : 65536")
+        this.log("created - Addressable space : 65536")
 
         this.reset();
     }

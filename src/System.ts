@@ -35,6 +35,8 @@ export class System extends Hardware
         this._Memory = new Memory(true);
         this._MMU = new MMU(true, this._Memory);
         this._Clock = new Clock(true, CLOCK_INTERVAL);
+
+        this.log("created");
         
         /*
         Start the system (Analogous to pressing the power button and having voltages flow through the components)
