@@ -31,7 +31,7 @@ export class System extends Hardware
     {
         super(0, "System", debug);
 
-        this._CPU = new Cpu(true);
+        this._CPU = new Cpu(true, this, this._MMU);
         this._Memory = new Memory(true);
         this._MMU = new MMU(true, this._Memory);
         this._Clock = new Clock(true, CLOCK_INTERVAL);
