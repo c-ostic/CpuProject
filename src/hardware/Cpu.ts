@@ -52,14 +52,14 @@ export class Cpu extends Hardware implements ClockListener
         this.secondOperand = 0x00;
 
         this.log("created");
-
-        this.instBitString = 0b101001;
     }
     
 
     public pulse() : void
     {
         this.cpuClockCount++;
+
+        var previousPC : number = this.programCounter; //used for logging to show PC before fetch/decode
 
         if(this.instBitString == 0)             //step 0 : Fetch
         {
@@ -109,7 +109,7 @@ export class Cpu extends Hardware implements ClockListener
             this.stepCount = -1;
         }
 
-        this.log("CPU State | PC: " + this.hexLog(this.programCounter, ADD_SPACE_FMT_LEN) + " IR: " + this.hexLog(this.instructionRegister, WORD_FMT_LEN)
+        this.log("CPU State | PC: " + this.hexLog(previousPC, ADD_SPACE_FMT_LEN) + " IR: " + this.hexLog(this.instructionRegister, WORD_FMT_LEN)
                 + " Acc: " + this.hexLog(this.accumulator, WORD_FMT_LEN) + " xReg: " + this.hexLog(this.xRegister, WORD_FMT_LEN)
                 + " yReg: " + this.hexLog(this.yRegister, WORD_FMT_LEN) + " zFlag: " + (this.zFlag ? 1 : 0) + " Step: " + this.stepCount);
     }
@@ -118,6 +118,10 @@ export class Cpu extends Hardware implements ClockListener
     //step 0 : 00000000
     private fetch() : void
     {
+        this._MMU.setAddressByte(this.programCounter);
+        this.instructionRegister = this._MMU.read();
+        this.programCounter++;
+
 		this.instBitString = step1; //force the next cycle to decode
         //this.log("Fetch");
     }
@@ -133,6 +137,28 @@ export class Cpu extends Hardware implements ClockListener
         The pulse method if-else block tests for each bit in order to determine what step to take next
         At the end, the instBitString is empty, which corresponds to the fetch step for the next instruction cycle
         */
+
+        switch(this.instructionRegister)
+        {
+            case 0x00:
+            {
+                this._System.stopSystem();
+                break;
+            }
+            case 0xA9:
+            {
+                this._MMU.setAddressByte(this.programCounter);
+                this.accumulator = this._MMU.read();
+                this.instBitString = 0b100000;
+                break;
+            }
+            default:
+            {
+                this.log("Something I don't know is here")
+            }
+        }
+
+        this.programCounter++;
         //this.log("Decode " + isFirst);
     }
 

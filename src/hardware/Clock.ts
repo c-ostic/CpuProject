@@ -1,3 +1,4 @@
+import { clear } from "console";
 import { Hardware } from "./Hardware";
 import { ClockListener } from "./imp/ClockListener";
 
@@ -5,6 +6,7 @@ export class Clock extends Hardware
 {
     private clockListeners : ClockListener[];
     private clockInterval : number;
+    private intervalHandle : NodeJS.Timeout;
 
     constructor(debug : boolean, interval : number)
     {
@@ -12,7 +14,7 @@ export class Clock extends Hardware
         this.clockListeners = new Array();
         this.clockInterval = interval;
 
-        setInterval(() => this.sendPulse(), this.clockInterval);
+        this.intervalHandle = setInterval(() => this.sendPulse(), this.clockInterval);
 
         this.log("created");
     }
@@ -34,5 +36,12 @@ export class Clock extends Hardware
         {
             listener.pulse();
         }
+    }
+
+
+    //stops the clock pulse from firing
+    public stopPulse() : void
+    {
+        clearInterval(this.intervalHandle);
     }
 }

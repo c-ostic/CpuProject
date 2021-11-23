@@ -11,7 +11,7 @@ import { MMU } from "./hardware/MMU";
  */
 // Initialization Parameters for Hardware
 // Clock cycle interval
-const CLOCK_INTERVAL= 500;               // This is in ms (milliseconds) so 1000 = 1 second, 100 = 1/10 second
+const CLOCK_INTERVAL= 200;               // This is in ms (milliseconds) so 1000 = 1 second, 100 = 1/10 second
                                         // A setting of 100 is equivalent to 10hz, 1 would be 1,000hz or 1khz,
                                         // .001 would be 1,000,000 or 1mhz. Obviously you will want to keep this
                                         // small, I recommend a setting of 100, if you want to slow things down
@@ -31,9 +31,9 @@ export class System extends Hardware
     {
         super(0, "System", debug);
 
-        this._CPU = new Cpu(true, this, this._MMU);
         this._Memory = new Memory(false);
         this._MMU = new MMU(false, this._Memory);
+        this._CPU = new Cpu(true, this, this._MMU);
         this._Clock = new Clock(false, CLOCK_INTERVAL);
 
         this.log("created");
@@ -61,6 +61,8 @@ export class System extends Hardware
 
     public stopSystem(): boolean 
     {
+        this._Clock.stopPulse();
+        this.log("Halting...");
         return false;
     }
 
