@@ -194,6 +194,38 @@ export class Cpu extends Hardware implements ClockListener
                 this.instBitString = 0b100100;
                 break;
             }
+            case 0xAD: case 0xAE: case 0xAC:
+            {
+                if(isFirst)
+                {
+                    this._MMU.setAddressByte(this.programCounter);
+                    this.firstOperand = this._MMU.read();
+                    this.instBitString = 0b100110;
+                }
+                else
+                {
+                    this._MMU.setAddressByte(this.programCounter);
+                    this.secondOperand = this._MMU.read();
+                }
+                this.programCounter++;
+                break;
+            }
+            case 0x8D:
+            {
+                if(isFirst)
+                {
+                    this._MMU.setAddressByte(this.programCounter);
+                    this.firstOperand = this._MMU.read();
+                    this.instBitString = 0b110110;
+                }
+                else
+                {
+                    this._MMU.setAddressByte(this.programCounter);
+                    this.secondOperand = this._MMU.read();
+                }
+                this.programCounter++;
+                break;
+            }
             default:
             {
                 this.log("Something I don't know is here")
@@ -228,6 +260,33 @@ export class Cpu extends Hardware implements ClockListener
                 this.yRegister = this.accumulator;
                 break;
             }
+            case 0xAD:
+            {
+                this._MMU.setAddressByte(this.firstOperand, true, false);
+                this._MMU.setAddressByte(this.secondOperand, true, true);
+                this.accumulator = this._MMU.read();
+                break;
+            }
+            case 0xAE:
+            {
+                this._MMU.setAddressByte(this.firstOperand, true, false);
+                this._MMU.setAddressByte(this.secondOperand, true, true);
+                this.xRegister = this._MMU.read();
+                break;
+            }
+            case 0xAC:
+            {
+                this._MMU.setAddressByte(this.firstOperand, true, false);
+                this._MMU.setAddressByte(this.secondOperand, true, true);
+                this.yRegister = this._MMU.read();
+                break;
+            }
+            case 0x8D:
+            {
+                this._MMU.setAddressByte(this.firstOperand, true, false);
+                this._MMU.setAddressByte(this.secondOperand, true, true);
+                break;
+            }
             default:
             {
                 this.log("Something I don't know is here")
@@ -240,6 +299,7 @@ export class Cpu extends Hardware implements ClockListener
     //step 5 : 00010000
     private writeBack() : void
     {
+        this._MMU.write(this.accumulator);
         //this.log("Write Back");
     }
 

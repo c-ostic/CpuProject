@@ -32,7 +32,7 @@ export class System extends Hardware
         super(0, "System", debug);
 
         this._Memory = new Memory(false);
-        this._MMU = new MMU(false, this._Memory);
+        this._MMU = new MMU(true, this._Memory);
         this._CPU = new Cpu(true, this, this._MMU);
         this._Clock = new Clock(false, CLOCK_INTERVAL);
 
@@ -45,8 +45,6 @@ export class System extends Hardware
          */
 
         this.startSystem();
-
-        this._MMU.memoryDump(0x0000, 0x000F);
     }
 
     public startSystem(): boolean 
@@ -63,23 +61,29 @@ export class System extends Hardware
     {
         this._Clock.stopPulse();
         this.log("Halting...");
+        this._MMU.memoryDump(0x000D, 0x0010);
         return false;
     }
 
     public flashProgram() : void
     {
-        this._MMU.writeImmediate(0x0000, 0xA9);
-        this._MMU.writeImmediate(0x0001, 0x01);
-        this._MMU.writeImmediate(0x0002, 0xAA);
-        this._MMU.writeImmediate(0x0003, 0xA8);
-        this._MMU.writeImmediate(0x0004, 0xA2);
-        this._MMU.writeImmediate(0x0005, 0x02);
-        this._MMU.writeImmediate(0x0006, 0x8A);
-        this._MMU.writeImmediate(0x0007, 0xA0);
-        this._MMU.writeImmediate(0x0008, 0x03);
-        this._MMU.writeImmediate(0x0009, 0x98);
-        this._MMU.writeImmediate(0x000A, 0xEA);
+        this._MMU.writeImmediate(0x0000, 0xAD);
+        this._MMU.writeImmediate(0x0001, 0x0D);
+        this._MMU.writeImmediate(0x0002, 0x00);
+        this._MMU.writeImmediate(0x0003, 0xAE);
+        this._MMU.writeImmediate(0x0004, 0x0E);
+        this._MMU.writeImmediate(0x0005, 0x00);
+        this._MMU.writeImmediate(0x0006, 0xAC);
+        this._MMU.writeImmediate(0x0007, 0x0F);
+        this._MMU.writeImmediate(0x0008, 0x00);
+        this._MMU.writeImmediate(0x0009, 0x8D);
+        this._MMU.writeImmediate(0x000A, 0x10);
         this._MMU.writeImmediate(0x000B, 0x00);
+        this._MMU.writeImmediate(0x000C, 0x00);
+        this._MMU.writeImmediate(0x000D, 0x20);
+        this._MMU.writeImmediate(0x000E, 0x30);
+        this._MMU.writeImmediate(0x000F, 0x40);
+        this._MMU.writeImmediate(0x0010, 0x00);
     }
 }
 
