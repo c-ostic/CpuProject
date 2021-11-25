@@ -140,16 +140,58 @@ export class Cpu extends Hardware implements ClockListener
 
         switch(this.instructionRegister)
         {
-            case 0x00:
+            case 0x00:                              //Break
             {
                 this._System.stopSystem();
                 break;
             }
-            case 0xA9:
+            case 0xEA:                              //No Op
+            {
+                this.instBitString = 0b100000;
+                break;
+            }
+            case 0xA9:                              //Load Acc with a constant
             {
                 this._MMU.setAddressByte(this.programCounter);
                 this.accumulator = this._MMU.read();
                 this.instBitString = 0b100000;
+                this.programCounter++;
+                break;
+            }
+            case 0xA2:                              //Load register x with a constant
+            {
+                this._MMU.setAddressByte(this.programCounter);
+                this.xRegister = this._MMU.read();
+                this.instBitString = 0b100000;
+                this.programCounter++;
+                break;
+            }
+            case 0xA0:                              //Load register y with a constant
+            {
+                this._MMU.setAddressByte(this.programCounter);
+                this.yRegister = this._MMU.read();
+                this.instBitString = 0b100000;
+                this.programCounter++;
+                break;
+            }
+            case 0x8A:                              //Load Acc from register x
+            {
+                this.instBitString = 0b100100;
+                break;
+            }
+            case 0x98:                              //Load Acc from register y
+            {
+                this.instBitString = 0b100100;
+                break;
+            }
+            case 0xAA:                              //Load register x from Acc
+            {
+                this.instBitString = 0b100100;
+                break;
+            }
+            case 0xA8:                              //Load register y from Acc
+            {
+                this.instBitString = 0b100100;
                 break;
             }
             default:
@@ -157,8 +199,6 @@ export class Cpu extends Hardware implements ClockListener
                 this.log("Something I don't know is here")
             }
         }
-
-        this.programCounter++;
         //this.log("Decode " + isFirst);
     }
 
@@ -166,6 +206,33 @@ export class Cpu extends Hardware implements ClockListener
     //steps 3 and 4 : 00001100
     private execute(isFirst : boolean) : void
     {
+        switch(this.instructionRegister)
+        {
+            case 0x8A:                              //Load Acc from register x
+            {
+                this.accumulator = this.xRegister;
+                break;
+            }
+            case 0x98:                              //Load Acc from register y
+            {
+                this.accumulator = this.yRegister;
+                break;
+            }
+            case 0xAA:                              //Load register x from Acc
+            {
+                this.xRegister = this.accumulator;
+                break;
+            }
+            case 0xA8:                              //Load register y from Acc
+            {
+                this.yRegister = this.accumulator;
+                break;
+            }
+            default:
+            {
+                this.log("Something I don't know is here")
+            }
+        }
         //this.log("Execute " + isFirst);
     }
 

@@ -69,16 +69,17 @@ export class System extends Hardware
     public flashProgram() : void
     {
         this._MMU.writeImmediate(0x0000, 0xA9);
-        this._MMU.writeImmediate(0x0001, 0x0D);
-        this._MMU.writeImmediate(0x0002, 0xA9);
-        this._MMU.writeImmediate(0x0003, 0x1D);
-        this._MMU.writeImmediate(0x0004, 0xA9);
-        this._MMU.writeImmediate(0x0005, 0x2D);
-        this._MMU.writeImmediate(0x0006, 0xA9);
-        this._MMU.writeImmediate(0x0007, 0x3F);
-        this._MMU.writeImmediate(0x0008, 0xA9);
-        this._MMU.writeImmediate(0x0009, 0xFF);
-        this._MMU.writeImmediate(0x000A, 0x00);
+        this._MMU.writeImmediate(0x0001, 0x01);
+        this._MMU.writeImmediate(0x0002, 0xAA);
+        this._MMU.writeImmediate(0x0003, 0xA8);
+        this._MMU.writeImmediate(0x0004, 0xA2);
+        this._MMU.writeImmediate(0x0005, 0x02);
+        this._MMU.writeImmediate(0x0006, 0x8A);
+        this._MMU.writeImmediate(0x0007, 0xA0);
+        this._MMU.writeImmediate(0x0008, 0x03);
+        this._MMU.writeImmediate(0x0009, 0x98);
+        this._MMU.writeImmediate(0x000A, 0xEA);
+        this._MMU.writeImmediate(0x000B, 0x00);
     }
 }
 
