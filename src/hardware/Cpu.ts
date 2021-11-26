@@ -130,7 +130,7 @@ export class Cpu extends Hardware implements ClockListener
     //steps 1 and 2 : 00000011
     private decode(isFirst : boolean) : void
     {
-        /*Bit String explanation
+        /*Instruction Bit String explanation
         Each of the last six bits of the instBitString variable represent one of the CPU steps (except for fetch)
         During the decode step, this bitString is "filled" (with 1s) to queue up specific steps according to the instruction in the IR
         After each step, the corresponding bit is flipped to 0 to show the CPU does not need to run that step again
@@ -194,7 +194,7 @@ export class Cpu extends Hardware implements ClockListener
                 this.instBitString = 0b100100;
                 break;
             }
-            case 0xAD: case 0xAE: case 0xAC: case 0x6D:   //Load Acc, register x, and register y from memory; Add
+            case 0xAD: case 0xAE: case 0xAC: case 0x6D: case 0xEC:   //Load Acc, register x, and register y from memory; Add; Compare to x
             {
                 if(isFirst)
                 {
@@ -239,6 +239,14 @@ export class Cpu extends Hardware implements ClockListener
                     this._MMU.setAddressByte(this.programCounter);
                     this.secondOperand = this._MMU.read();
                 }
+                this.programCounter++;
+                break;
+            }
+            case 0xD0:
+            {
+                this._MMU.setAddressByte(this.programCounter);
+                this.firstOperand = this._MMU.read();
+                this.instBitString = 0b100100;
                 this.programCounter++;
                 break;
             }
@@ -329,6 +337,29 @@ export class Cpu extends Hardware implements ClockListener
                         this.log("Overflow Error: Contents not incremented");
                     else
                         this.accumulator = (this.accumulator + 1) & 0b11111111;
+                }
+                break;
+            }
+            case 0xEC:                              //Compare to x
+            {
+                this._MMU.setAddressByte(this.firstOperand, true, false);
+                this._MMU.setAddressByte(this.secondOperand, true, true);
+                var compare : number = this._MMU.read();
+                this.zFlag = (this.xRegister == compare);
+                break;
+            }
+            case 0xD0:                              //Branch not equal
+            {
+                if(!this.zFlag)
+                {
+                    //if the operand is negative, flip the bit and add 1, then subtract
+                    if(this.firstOperand & 0b10000000)     
+                    {
+                        this.firstOperand = ~this.firstOperand + 1;
+                        this.programCounter -= this.firstOperand;
+                    }
+                    else
+                        this.programCounter += this.firstOperand;
                 }
                 break;
             }
