@@ -194,7 +194,7 @@ export class Cpu extends Hardware implements ClockListener
                 this.instBitString = 0b100100;
                 break;
             }
-            case 0xAD: case 0xAE: case 0xAC:
+            case 0xAD: case 0xAE: case 0xAC: case 0x6D:   //Load Acc, register x, and register y from memory; Add
             {
                 if(isFirst)
                 {
@@ -210,13 +210,29 @@ export class Cpu extends Hardware implements ClockListener
                 this.programCounter++;
                 break;
             }
-            case 0x8D:
+            case 0x8D:                              //Store from Acc into memory
             {
                 if(isFirst)
                 {
                     this._MMU.setAddressByte(this.programCounter);
                     this.firstOperand = this._MMU.read();
                     this.instBitString = 0b110110;
+                }
+                else
+                {
+                    this._MMU.setAddressByte(this.programCounter);
+                    this.secondOperand = this._MMU.read();
+                }
+                this.programCounter++;
+                break;
+            }
+            case 0xEE:                              //Increment
+            {
+                if(isFirst)
+                {
+                    this._MMU.setAddressByte(this.programCounter);
+                    this.firstOperand = this._MMU.read();
+                    this.instBitString = 0b111110;
                 }
                 else
                 {
@@ -260,31 +276,60 @@ export class Cpu extends Hardware implements ClockListener
                 this.yRegister = this.accumulator;
                 break;
             }
-            case 0xAD:
+            case 0xAD:                              //Load Acc from memory
             {
                 this._MMU.setAddressByte(this.firstOperand, true, false);
                 this._MMU.setAddressByte(this.secondOperand, true, true);
                 this.accumulator = this._MMU.read();
                 break;
             }
-            case 0xAE:
+            case 0xAE:                              //Load register x from memory
             {
                 this._MMU.setAddressByte(this.firstOperand, true, false);
                 this._MMU.setAddressByte(this.secondOperand, true, true);
                 this.xRegister = this._MMU.read();
                 break;
             }
-            case 0xAC:
+            case 0xAC:                              //Load register y from memory
             {
                 this._MMU.setAddressByte(this.firstOperand, true, false);
                 this._MMU.setAddressByte(this.secondOperand, true, true);
                 this.yRegister = this._MMU.read();
                 break;
             }
-            case 0x8D:
+            case 0x8D:                              //Store from Acc in memory
             {
                 this._MMU.setAddressByte(this.firstOperand, true, false);
                 this._MMU.setAddressByte(this.secondOperand, true, true);
+                break;
+            }
+            case 0x6D:                              //Add
+            {
+                this._MMU.setAddressByte(this.firstOperand, true, false);
+                this._MMU.setAddressByte(this.secondOperand, true, true);
+                var operand : number = this._MMU.read();
+                var result : number = this.accumulator + operand;
+                if(((this.accumulator & 0b10000000) == (operand & 0b10000000)) && ((result & 0b10000000) != (operand & 0b10000000)))
+                    this.log("Overflow Error: Contents not saved");
+                else
+                    this.accumulator = result & 0b11111111;
+                break;
+            }
+            case 0xEE:                              //Increment
+            {
+                if(isFirst)
+                {
+                    this._MMU.setAddressByte(this.firstOperand, true, false);
+                    this._MMU.setAddressByte(this.secondOperand, true, true);
+                    this.accumulator = this._MMU.read();
+                }
+                else
+                {
+                    if(this.accumulator == 0b01111111)
+                        this.log("Overflow Error: Contents not incremented");
+                    else
+                        this.accumulator = (this.accumulator + 1) & 0b11111111;
+                }
                 break;
             }
             default:
