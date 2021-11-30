@@ -1,3 +1,4 @@
+import { Ascii } from "../Ascii";
 import {System} from "../System";
 import { Hardware } from "./Hardware";
 import { ClockListener } from "./imp/ClockListener";
@@ -68,38 +69,38 @@ export class Cpu extends Hardware implements ClockListener
         }
         else if(this.instBitString & step1)     //step 1 : Decode 1
         {
-            this.decode(true);
             this.instBitString &= ~step1;
+            this.decode(true);
             this.stepCount = 1;
         }
         else if(this.instBitString & step2)     //step 2 : Decode 2
         {
-            this.decode(false);
             this.instBitString &= ~step2;
+            this.decode(false);
             this.stepCount = 2;
         }
         else if(this.instBitString & step3)     //step 3 : Execute 1
         {
-            this.execute(true);
             this.instBitString &= ~step3;
+            this.execute(true);
             this.stepCount = 3;
         }
         else if(this.instBitString & step4)     //step 4 : Execute 2
         {
-            this.execute(false);
             this.instBitString &= ~step4;
+            this.execute(false);
             this.stepCount = 4;
         }
         else if(this.instBitString & step5)     //step 5 : Write Back
         {
-            this.writeBack();
             this.instBitString &= ~step5;
+            this.writeBack();
             this.stepCount = 5;
         }
         else if(this.instBitString & step6)     //step 6 : Interrupt Check
         {
-            this.interruptCheck();
             this.instBitString &= ~step6;
+            this.interruptCheck();
             this.stepCount = 6;
         }
         else
@@ -242,12 +243,41 @@ export class Cpu extends Hardware implements ClockListener
                 this.programCounter++;
                 break;
             }
-            case 0xD0:
+            case 0xD0:                              //Branch
             {
                 this._MMU.setAddressByte(this.programCounter);
                 this.firstOperand = this._MMU.read();
                 this.instBitString = 0b100100;
                 this.programCounter++;
+                break;
+            }
+            case 0xFF:                              //System call
+            {
+                if(this.xRegister == 0x1)
+                {
+                    this.instBitString = 0b100100;
+                }
+                else if(this.xRegister == 0x2)
+                {
+                    this.firstOperand = this.yRegister;
+                    this.secondOperand = this.programCounter >> 8;
+                    this.instBitString = 0b100100;
+                }
+                else if(this.xRegister == 0x3)
+                {
+                    if(isFirst)
+                    {
+                        this._MMU.setAddressByte(this.programCounter);
+                        this.firstOperand = this._MMU.read();
+                        this.instBitString = 0b100110;
+                    }
+                    else
+                    {
+                        this._MMU.setAddressByte(this.programCounter);
+                        this.secondOperand = this._MMU.read();
+                    }
+                    this.programCounter++;
+                }
                 break;
             }
             default:
@@ -360,6 +390,34 @@ export class Cpu extends Hardware implements ClockListener
                     }
                     else
                         this.programCounter += this.firstOperand;
+                }
+                break;
+            }
+            case 0xFF:                              //System call
+            {
+                if(this.xRegister == 0x1)
+                {
+                    process.stdout.write(this.yRegister + "");
+                }
+                else if(this.xRegister == 0x2 || this.xRegister == 0x3)
+                {
+                    this._MMU.setAddressByte(this.firstOperand, true, false);
+                    this._MMU.setAddressByte(this.secondOperand, true, true);
+                    var charByte : number = this._MMU.read();
+                    if(charByte != 0x00)
+                    {
+                        process.stdout.write(Ascii.toChar(charByte));
+
+                        //increment the operands to get the next character of the string
+                        this.firstOperand++;
+                        if(this.firstOperand >= 0x100)
+                        {
+                            this.firstOperand = 0x00;
+                            this.secondOperand++;
+                        }
+                        if(this.secondOperand < 0x100)
+                            this.instBitString |= step3; //make the execute step happen again until 0x00 or the end of memory is reached 
+                    }
                 }
                 break;
             }

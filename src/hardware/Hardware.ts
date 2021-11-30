@@ -52,9 +52,9 @@ export class Hardware
     }
 
     //return the hex string representation of num
-    public hexLog(num : number, length : number) : String
+    public hexLog(num : number, length : number) : string
     {
-        var stringNum : String = num.toString(16);
+        var stringNum : string = num.toString(16);
 
         stringNum = stringNum.padStart(length, "0").toUpperCase();
 
