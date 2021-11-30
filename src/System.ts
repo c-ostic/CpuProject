@@ -2,6 +2,8 @@
 import { Clock } from "./hardware/Clock";
 import { Cpu } from "./hardware/Cpu";
 import { Hardware } from "./hardware/Hardware";
+import { InterruptController } from "./hardware/InterruptController";
+import { Keyboard } from "./hardware/Keyboard";
 import { Memory } from "./hardware/Memory";
 import { MMU } from "./hardware/MMU";
 
@@ -24,6 +26,8 @@ export class System extends Hardware
     private _Memory : Memory = null;
     private _MMU : MMU = null;
     private _Clock : Clock = null;
+    private _IC : InterruptController = null;
+    private _Keyboard : Keyboard = null;
     
     public running: boolean = false;
 
@@ -32,8 +36,10 @@ export class System extends Hardware
         super(0, "System", debug);
 
         this._Memory = new Memory(false);
-        this._MMU = new MMU(true, this._Memory);
-        this._CPU = new Cpu(true, this, this._MMU);
+        this._MMU = new MMU(false, this._Memory);
+        this._IC = new InterruptController(false);
+        this._Keyboard = new Keyboard(false, this._IC);
+        this._CPU = new Cpu(false, this, this._MMU, this._IC);
         this._Clock = new Clock(false, CLOCK_INTERVAL);
 
         this.log("created");
@@ -51,6 +57,7 @@ export class System extends Hardware
     {
         this._Clock.register(this._CPU);
         this._Clock.register(this._Memory);
+        this._IC.startListen();
 
         this.systemCallProgram();
 
@@ -59,6 +66,7 @@ export class System extends Hardware
 
     public stopSystem(): boolean 
     {
+        this.log("Halting... Ctrl^C to exit");
         this._Clock.stopPulse();
         return false;
     }

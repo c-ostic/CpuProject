@@ -2,6 +2,7 @@ import { Ascii } from "../Ascii";
 import {System} from "../System";
 import { Hardware } from "./Hardware";
 import { ClockListener } from "./imp/ClockListener";
+import { InterruptController } from "./InterruptController";
 import { MMU } from "./MMU";
 
 const step1 : number = 0b000001;
@@ -17,6 +18,7 @@ export class Cpu extends Hardware implements ClockListener
 {
     private _MMU : MMU;
     private _System : System
+    private _IC : InterruptController;
     private cpuClockCount : number;
     private programCounter : number;
     private zFlag : boolean;
@@ -35,11 +37,15 @@ export class Cpu extends Hardware implements ClockListener
     private firstOperand : number;
     private secondOperand : number;
 
-    constructor(debug : boolean, system : System, mmu : MMU) 
+    //used to track the current interrupt priority
+    private currentPriority : number;
+
+    constructor(debug : boolean, system : System, mmu : MMU, ic : InterruptController) 
     {
         super(0, "CPU", debug);
         this._System = system;
         this._MMU = mmu;
+        this._IC = ic;
         this.cpuClockCount = 0;
         this.programCounter = 0x00;
         this.zFlag = false;
@@ -51,6 +57,7 @@ export class Cpu extends Hardware implements ClockListener
         this.stepCount = 0;
         this.firstOperand = 0x00;
         this.secondOperand = 0x00;
+        this.currentPriority = 0;
 
         this.log("created");
     }
@@ -441,6 +448,11 @@ export class Cpu extends Hardware implements ClockListener
     //step 6 : 00100000
     private interruptCheck() : void
     {
+        if(this._IC.hasInterrupt() > this.currentPriority)
+        {
+            this._IC.getInterrupt().execute();
+            this.instBitString |= step6; // force check for interrupts again
+        }
         //this.log("InterruptCheck");
     }
 }
