@@ -11,7 +11,7 @@ export class Ascii
 {
     public static toChar(byte : number)
     {
-        return ASCII_TABLE[byte];
+        return ASCII_TABLE[byte] ?? ""; //if the byte is out of range (undefined) return empty string
     }
 
     public static toByte(char : string)

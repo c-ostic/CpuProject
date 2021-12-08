@@ -355,9 +355,13 @@ export class Cpu extends Hardware implements ClockListener
                 var operand : number = this._MMU.read();
                 var result : number = this.accumulator + operand;
                 if(((this.accumulator & 0b10000000) == (operand & 0b10000000)) && ((result & 0b10000000) != (operand & 0b10000000)))
+                {
                     this.log("Overflow Error: Contents not saved");
+                    this._System.log("Overflow Error: Shutting down");
+                    this._System.stopSystem();
+                }
                 else
-                    this.accumulator = result & 0b11111111;
+                    this.accumulator = result & 0b11111111; //takes care of end around carry
                 break;
             }
             case 0xEE:                              //Increment
@@ -371,7 +375,11 @@ export class Cpu extends Hardware implements ClockListener
                 else
                 {
                     if(this.accumulator == 0b01111111)
-                        this.log("Overflow Error: Contents not incremented");
+                    {
+                        this.log("Overflow Error: Contents not saved");
+                        this._System.log("Overflow Error: Shutting down");
+                        this._System.stopSystem();
+                    }
                     else
                         this.accumulator = (this.accumulator + 1) & 0b11111111;
                 }
@@ -389,14 +397,10 @@ export class Cpu extends Hardware implements ClockListener
             {
                 if(!this.zFlag)
                 {
-                    //if the operand is negative, flip the bit and add 1, then subtract
-                    if(this.firstOperand & 0b10000000)     
-                    {
-                        this.firstOperand = ~this.firstOperand + 1;
-                        this.programCounter -= this.firstOperand;
-                    }
-                    else
-                        this.programCounter += this.firstOperand;
+                    //if the operand is negative, pad with FF
+                    if(this.firstOperand & 0b10000000)
+                        this.firstOperand |= 0xFF00;
+                    this.programCounter = (this.programCounter + this.firstOperand) & 0b11111111
                 }
                 break;
             }
@@ -404,10 +408,11 @@ export class Cpu extends Hardware implements ClockListener
             {
                 if(this.xRegister == 0x1)
                 {
-                    process.stdout.write(this.yRegister + "");
+                    process.stdout.write(this.yRegister.toString(16));
                 }
                 else if(this.xRegister == 0x2 || this.xRegister == 0x3)
                 {
+                    //for both options 2 and 3, the operands are set in decode
                     this._MMU.setAddressByte(this.firstOperand, true, false);
                     this._MMU.setAddressByte(this.secondOperand, true, true);
                     var charByte : number = this._MMU.read();
@@ -422,6 +427,7 @@ export class Cpu extends Hardware implements ClockListener
                             this.firstOperand = 0x00;
                             this.secondOperand++;
                         }
+
                         if(this.secondOperand < 0x100)
                             this.instBitString |= step3; //make the execute step happen again until 0x00 or the end of memory is reached 
                     }
